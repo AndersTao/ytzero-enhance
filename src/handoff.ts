@@ -1,4 +1,4 @@
-import { handoffWatchUrl } from "./core";
+import { handoffWatchUrl, withRedirectedMarker } from "./core";
 import { t } from "./i18n";
 
 /*
@@ -50,7 +50,7 @@ function createButton(instanceUrl: () => string) {
   button.addEventListener("click", (event) => {
     const video = mainVideo();
     const live = Boolean(document.querySelector(".html5-video-player")?.classList.contains("ytp-live"));
-    const destination = handoffWatchUrl(location.href, instanceUrl(), sourcePlayerSeconds(video, live));
+    const destination = withRedirectedMarker(handoffWatchUrl(location.href, instanceUrl(), sourcePlayerSeconds(video, live)));
     if (!destination) return;
     video?.pause();
     if (event.metaKey || event.ctrlKey) window.open(destination, "_blank", "noopener");

@@ -17,6 +17,8 @@ const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
 const CHANNEL_ID = /^UC[A-Za-z0-9_-]{22}$/;
 const PLAYLIST_ID = /^[A-Za-z0-9_-]{10,80}$/;
 export const YT_NO_REDIRECT_MARKER = "ytNoRedirect";
+/** Tells a YT Zero watch page the video was sent there from the source site. */
+export const YT_REDIRECTED_MARKER = "ytRedirected";
 
 function youtubeUrl(input: string): URL | null {
   try {
@@ -168,6 +170,17 @@ export function handoffWatchUrl(input: string, instanceUrl: string, seconds: num
   const at = Number.isFinite(seconds) && seconds >= 1 ? Math.floor(seconds) : 0;
   if (at) unmarked.searchParams.set("t", String(at));
   return localWatchUrl(unmarked.toString(), instanceUrl);
+}
+
+/** Mark an instance watch URL so the page can offer the way back to the source site. */
+export function withRedirectedMarker(destination: string | null): string | null {
+  if (!destination) return null;
+  try {
+    const url = new URL(destination);
+    if (!/\/watch\/[^/]+/.test(url.pathname)) return destination;
+    url.hash = YT_REDIRECTED_MARKER;
+    return url.toString();
+  } catch { return destination; }
 }
 
 /** Map a source-site video, public playlist, or channel page to YT Zero. */

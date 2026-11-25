@@ -41,6 +41,7 @@ The sibling `../ytzero` repository owns the application-side bridge. Its relevan
 
 - Redirects listen to both `webNavigation.onCommitted` and `onHistoryStateUpdated`: the source site switches videos in-page, so a click on a video there never commits a new document. Back/Forward (`forward_back` qualifier) never redirects, so leaving the instance with Back does not bounce the user again.
 - On `www.youtube.com` watch pages the top-frame content script puts a YT Zero button after the subscribe button (`src/handoff.ts`), only when a default instance is set. It pauses the source player and opens the video in the default instance at the reached position (no position for live broadcasts); Ctrl/Cmd-click opens a new tab. The explicit click ignores the no-redirect marker.
+- Every hand-over to an instance watch page (automatic redirect, popup redirect, handoff button) appends `#ytRedirected` via `withRedirectedMarker()`. The YT Zero watch page reads it to offer a way back to the source video at the current position, with `#ytNoRedirect` so it is not redirected again.
 
 ## Embedded player interaction decisions
 

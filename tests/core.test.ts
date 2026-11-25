@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { containedMediaRect, embeddedPlayerModeForPage, handoffWatchUrl, hasNoRedirectMarker, isPreviewEmbedUrl, isRedirectableYouTubeUrl, localContentUrl, localWatchUrl, parseTimestamp, playableLiveRange, playerTimeline, resolveEmbeddedPlayerMode, safeFilename, screenshotFilename, youtubePlaylistId, youtubeVideoId } from "../src/core";
+import { containedMediaRect, embeddedPlayerModeForPage, handoffWatchUrl, withRedirectedMarker, hasNoRedirectMarker, isPreviewEmbedUrl, isRedirectableYouTubeUrl, localContentUrl, localWatchUrl, parseTimestamp, playableLiveRange, playerTimeline, resolveEmbeddedPlayerMode, safeFilename, screenshotFilename, youtubePlaylistId, youtubeVideoId } from "../src/core";
 
 describe("YouTube URL mapping", () => {
   test.each([
@@ -96,5 +96,17 @@ describe("handing a source-site video over to YT Zero", () => {
     expect(handoffWatchUrl("https://www.youtube.com/embed/dQw4w9WgXcQ", instance, 5)).toBeNull();
     expect(handoffWatchUrl("https://example.com/watch?v=dQw4w9WgXcQ", instance, 5)).toBeNull();
     expect(handoffWatchUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "", 5)).toBeNull();
+  });
+});
+
+describe("marking videos sent to YT Zero", () => {
+  test("marks watch pages, also below a base path and with a playlist", () => {
+    expect(withRedirectedMarker("https://home.test/watch/dQw4w9WgXcQ?t=5")).toBe("https://home.test/watch/dQw4w9WgXcQ?t=5#ytRedirected");
+    expect(withRedirectedMarker("https://home.test/apps/ytzero/watch/dQw4w9WgXcQ/playlist/PL1234567890")).toBe("https://home.test/apps/ytzero/watch/dQw4w9WgXcQ/playlist/PL1234567890#ytRedirected");
+  });
+  test("leaves channel, playlist and search pages alone", () => {
+    expect(withRedirectedMarker("https://home.test/channel/UC1234567890123456789012")).toBe("https://home.test/channel/UC1234567890123456789012");
+    expect(withRedirectedMarker("https://home.test/playlist/PL1234567890")).toBe("https://home.test/playlist/PL1234567890");
+    expect(withRedirectedMarker(null)).toBeNull();
   });
 });
