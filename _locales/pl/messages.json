@@ -22,6 +22,7 @@
   "enhancePlayerDescription": { "message": "Wygląd i zachowanie zgodne z YT Zero" },
   "saveFrame": { "message": "Zapisz klatkę" },
   "openYtZero": { "message": "Otwórz YT Zero" },
+  "watchInYtZero": { "message": "Oglądaj w YT Zero od tego miejsca" },
   "pairAnother": { "message": "+ Połącz obecną kartę jako inną instancję" },
   "instancesAndSettings": { "message": "Instancje i ustawienia" },
   "browserExtension": { "message": "Rozszerzenie przeglądarki" },

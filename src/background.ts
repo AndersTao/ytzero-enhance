@@ -66,15 +66,20 @@ void pairedInstances().then(queuePairedInstanceContentScriptSync).catch(() => {}
 
 async function redirect(details: any) {
   if (details.frameId !== 0 || !isRedirectableYouTubeUrl(details.url)) return;
+  // Going back to a source-site page the user just left must not bounce them
+  // to the instance again.
+  if (Array.isArray(details.transitionQualifiers) && details.transitionQualifiers.includes("forward_back")) return;
   const config = await settings();
   if (!config.redirectEnabled) return;
   const destination = localContentUrl(details.url, config.instanceUrl);
   if (destination) await callApi(ext.tabs, "update", details.tabId, { url: destination }).catch(() => {});
 }
 
-ext.webNavigation.onCommitted.addListener(redirect, {
-  url: [{ hostSuffix: "youtube.com" }, { hostEquals: "youtu.be" }],
-});
+const REDIRECT_FILTER = { url: [{ hostSuffix: "youtube.com" }, { hostEquals: "youtu.be" }] };
+ext.webNavigation.onCommitted.addListener(redirect, REDIRECT_FILTER);
+// The source site switches videos in-page (History API) without a new
+// document, so a click on a video there only fires this event.
+ext.webNavigation.onHistoryStateUpdated?.addListener(redirect, REDIRECT_FILTER);
 
 ext.commands?.onCommand.addListener(async (command: string) => {
   if (command === "toggle-redirect") {

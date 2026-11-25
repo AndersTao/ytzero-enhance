@@ -153,6 +153,23 @@ export function localWatchUrl(input: string, instanceUrl: string): string | null
   return withInstancePath(instanceUrl, path, seconds > 0 ? `?t=${seconds}` : "");
 }
 
+/**
+ * Hand the video on the current source-site page over to YT Zero at the
+ * position it has reached. The user asked for it explicitly, so the
+ * no-redirect marker does not apply; any time in the address is replaced.
+ */
+export function handoffWatchUrl(input: string, instanceUrl: string, seconds: number): string | null {
+  const source = youtubeUrl(input);
+  if (!source || /^\/embed\//.test(source.pathname)) return null;
+  const unmarked = new URL(source);
+  unmarked.hash = "";
+  unmarked.searchParams.delete("t");
+  unmarked.searchParams.delete("start");
+  const at = Number.isFinite(seconds) && seconds >= 1 ? Math.floor(seconds) : 0;
+  if (at) unmarked.searchParams.set("t", String(at));
+  return localWatchUrl(unmarked.toString(), instanceUrl);
+}
+
 /** Map a source-site video, public playlist, or channel page to YT Zero. */
 export function localContentUrl(input: string, instanceUrl: string, resolvedChannelId?: string | null): string | null {
   const source = youtubeUrl(input);

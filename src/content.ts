@@ -2,6 +2,7 @@ import { containedMediaRect, DEFAULT_SETTINGS, embeddedPlayerModeForPage, Embedd
 import { BridgeScreenshotRequest, claimScreenshotRequest, configuredPageMatches, ContentType, embeddedPlayerParameters, EnhanceConfiguration, EnhanceContext, EnhancePlayerCommand, ENHANCE_BRIDGE_EVENTS, ENHANCE_PLAYER_EVENTS, frameStepSeconds, highestQualityAtOrBelow, isContentType, MAX_COMMAND_DETAIL_LENGTH, MAX_CONTEXT_DETAIL_LENGTH, parseBridgeDetail, playerPresentationState, validateEnhanceContext, validatePlayerCommand } from "./contract";
 import { EMBEDDED_CONFIGURATION_ID, PAIRED_INSTANCES_KEY, parseEmbeddedConfigurationText } from "./instances";
 import { t } from "./i18n";
+import { installHandoffButton, isSourceSiteTopPage } from "./handoff";
 import { advanceOwnedPlaybackRate, chapterShortcutTarget, DEFAULT_SHORTCUT_BINDINGS, isEditableShortcutEvent, matchingShortcutAction, OwnedPlaybackRate, PARENT_OWNED_SHORTCUT_ACTIONS, shortcutAllowsRepeat, shortcutChordFromEvent, shortcutEventPayload, shortcutOperationBlocked, TemporaryBoostController, type ShortcutAction, type ShortcutBindings } from "./shortcuts";
 import { addApiListener, callApi, ext, extensionContextAvailable, isFirefox, onExtensionContextInvalidated } from "./webext";
 
@@ -10,6 +11,7 @@ let remoteConfig: EnhanceConfiguration | null = null;
 let bridgeContext: EnhanceContext | null = null;
 let playerController: ReturnType<typeof enhanceYouTubePlayer> | null = null;
 let bridgeCleanup: (() => void) | null = null;
+let handoffCleanup: (() => void) | null = null;
 let playerObserver: MutationObserver | null = null;
 let configurationObserver: MutationObserver | null = null;
 let extensionStatusObserver: MutationObserver | null = null;
@@ -95,6 +97,8 @@ function shutdown(restoreEmbeds = false) {
   playerController = null;
   bridgeCleanup?.();
   bridgeCleanup = null;
+  handoffCleanup?.();
+  handoffCleanup = null;
   playerObserver?.disconnect();
   playerObserver = null;
   configurationObserver?.disconnect();
@@ -114,6 +118,7 @@ function boot() {
   if (window.top === window) {
     const isPairedInstance = activeInstanceUrl && configuredPageMatches(location.href, activeInstanceUrl);
     if (isPairedInstance) watchEmbeddedConfiguration();
+    if (!handoffCleanup && config.instanceUrl && isSourceSiteTopPage(location.href)) handoffCleanup = installHandoffButton(() => config.instanceUrl);
     bootPageBridge();
     if (isPairedInstance) markExtensionActiveWhenReady();
     return;

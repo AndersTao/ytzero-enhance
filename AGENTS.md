@@ -37,6 +37,11 @@ The sibling `../ytzero` repository owns the application-side bridge. Its relevan
 - Do not add the `tabs` permission: `activeTab`, paired-origin access and the fixed player-host permissions cover the current tab operations.
 - Multiple instances are supported. Each page uses its matching instance/profile; only supported video-link redirects use the default instance.
 
+## Source-site handoff
+
+- Redirects listen to both `webNavigation.onCommitted` and `onHistoryStateUpdated`: the source site switches videos in-page, so a click on a video there never commits a new document. Back/Forward (`forward_back` qualifier) never redirects, so leaving the instance with Back does not bounce the user again.
+- On `www.youtube.com` watch pages the top-frame content script puts a YT Zero button after the subscribe button (`src/handoff.ts`), only when a default instance is set. It pauses the source player and opens the video in the default instance at the reached position (no position for live broadcasts); Ctrl/Cmd-click opens a new tab. The explicit click ignores the no-redirect marker.
+
 ## Embedded player interaction decisions
 
 - Treat validated `context.video.contentType` (`default`, `short`, or `livestream`) as the source of truth for player presentation. Missing or unknown values retain the legacy `/shorts` and native-live fallbacks; valid context changes apply in place without reloading the iframe.
