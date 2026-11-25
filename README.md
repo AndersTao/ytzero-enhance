@@ -43,6 +43,7 @@ https://tools.applemediaservices.com/app-store/
 
 - Redirects supported watch, Shorts, live, short-link, and public-playlist URLs to your default YT Zero instance, preserving video timestamps and playlist context. Both `/playlist?list=…` and legacy `/show/VL…` playlist addresses are supported. The popup also offers an explicit redirect for supported video, public-playlist, and channel pages.
 - Redirects also follow in-page navigation on the source site, so clicking a video there opens it in your instance. A YT Zero button next to the subscribe button hands the current video over at the position you reached.
+- Right-click a video link or watch page on the source site and choose "Save for later in YT Zero" to add it to a "Saved for later" row on your instance's Main page.
 - Pairs securely from any signed-in YT Zero page; supports multiple local, LAN, HTTPS and reverse-proxy-path instances.
 - Reads the active YT Zero profile's playback speed, seek interval, FPS, keyboard shortcuts, quality ceiling, captions, chapters, SponsorBlock and screenshot naming settings.
 - Replaces the embedded player's native controls with a YT Zero-style control bar, buffering/progress display, chapters, SponsorBlock segments, volume, captions, PiP, fullscreen and theatre mode.

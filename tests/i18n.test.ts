@@ -24,7 +24,7 @@ test("every localized HTML key exists in the catalogs", async () => {
     const keys = [...html.matchAll(/data-i18n(?:-aria|-title)?="([A-Za-z0-9_]+)"/g)].map((match) => match[1]);
     for (const key of keys) expect(english[key]?.message, `${file}: ${key}`).toBeTruthy();
   }
-  for (const file of ["popup.ts", "options.ts", "content.ts", "background.ts", "contract.ts", "instances.ts", "handoff.ts"]) {
+  for (const file of ["popup.ts", "options.ts", "content.ts", "background.ts", "contract.ts", "instances.ts", "handoff.ts", "saveForLater.ts"]) {
     const source = await Bun.file(new URL(`../src/${file}`, import.meta.url)).text();
     const keys = [...source.matchAll(/\bt\("([A-Za-z0-9_]+)"\)/g)].map((match) => match[1]);
     for (const key of keys) expect(english[key]?.message, `${file}: ${key}`).toBeTruthy();

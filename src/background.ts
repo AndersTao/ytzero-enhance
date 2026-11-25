@@ -5,6 +5,7 @@ import { PAIRED_INSTANCE_CONTENT_SCRIPT_ID, pairedInstanceContentScriptMatches }
 import { t } from "./i18n";
 import { callApi, ext } from "./webext";
 import { operateYouTubeCaptions } from "./youtube-captions";
+import { SAVE_FOR_LATER_LINK_MENU, SAVE_FOR_LATER_PAGE_MENU, SAVE_FOR_LATER_TARGETS, saveForLater, saveForLaterVideoId, type SaveOutcome } from "./saveForLater";
 
 async function settings() {
   const stored = await callApi<Record<string, unknown>>(ext.storage.sync, "get", DEFAULT_SETTINGS);
@@ -80,6 +81,30 @@ ext.webNavigation.onCommitted.addListener(redirect, REDIRECT_FILTER);
 // The source site switches videos in-page (History API) without a new
 // document, so a click on a video there only fires this event.
 ext.webNavigation.onHistoryStateUpdated?.addListener(redirect, REDIRECT_FILTER);
+
+async function installContextMenus() {
+  if (!ext.contextMenus?.create) return;
+  await callApi(ext.contextMenus, "removeAll").catch(() => {});
+  const title = t("saveForLater");
+  ext.contextMenus.create({ id: SAVE_FOR_LATER_LINK_MENU, title, contexts: ["link"], targetUrlPatterns: SAVE_FOR_LATER_TARGETS });
+  ext.contextMenus.create({ id: SAVE_FOR_LATER_PAGE_MENU, title, contexts: ["page", "video"], documentUrlPatterns: SAVE_FOR_LATER_TARGETS });
+}
+ext.runtime?.onInstalled?.addListener(() => void installContextMenus());
+ext.runtime?.onStartup?.addListener(() => void installContextMenus());
+
+async function reportSave(tabId: number | undefined, outcome: SaveOutcome) {
+  if (typeof tabId !== "number") return;
+  await ext.action?.setBadgeBackgroundColor?.({ tabId, color: outcome.tone === "success" ? "#0a5fff" : "#b42318" });
+  await ext.action?.setBadgeText?.({ tabId, text: outcome.tone === "success" ? "✓" : "!" });
+  setTimeout(() => void ext.action?.setBadgeText?.({ tabId, text: null }), 3_000);
+  await callApi(ext.tabs, "sendMessage", tabId, { type: "ytze-toast", ...outcome }, { frameId: 0 }).catch(() => {});
+}
+
+ext.contextMenus?.onClicked?.addListener(async (info: any, tab: any) => {
+  if (info.menuItemId !== SAVE_FOR_LATER_LINK_MENU && info.menuItemId !== SAVE_FOR_LATER_PAGE_MENU) return;
+  const config = await settings();
+  await reportSave(tab?.id, await saveForLater(saveForLaterVideoId(info), config.instanceUrl));
+});
 
 ext.commands?.onCommand.addListener(async (command: string) => {
   if (command === "toggle-redirect") {
