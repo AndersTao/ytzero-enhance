@@ -23,7 +23,7 @@
   "saveFrame": { "message": "Save frame" },
   "openYtZero": { "message": "Open YT Zero" },
   "watchInYtZero": { "message": "Watch in YT Zero from here" },
-  "saveForLater": { "message": "Save for later in YT Zero" },
+  "saveForLater": { "message": "Save for later" },
   "saveForLaterSaved": { "message": "Saved to" },
   "saveForLaterAlready": { "message": "Already saved, moved to the front of" },
   "saveForLaterSignIn": { "message": "Sign in to YT Zero in this browser first." },

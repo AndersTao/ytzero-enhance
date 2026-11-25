@@ -23,7 +23,7 @@
   "saveFrame": { "message": "Bild speichern" },
   "openYtZero": { "message": "YT Zero öffnen" },
   "watchInYtZero": { "message": "Ab hier in YT Zero ansehen" },
-  "saveForLater": { "message": "Für später in YT Zero speichern" },
+  "saveForLater": { "message": "Für später speichern" },
   "saveForLaterSaved": { "message": "Gespeichert in" },
   "saveForLaterAlready": { "message": "Bereits gespeichert, nach vorne verschoben in" },
   "saveForLaterSignIn": { "message": "Melde dich zuerst in diesem Browser bei YT Zero an." },

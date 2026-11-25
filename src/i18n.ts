@@ -19,7 +19,7 @@ const EN: Record<string, string> = {
   saveFrame: "Save frame",
   openYtZero: "Open YT Zero",
   watchInYtZero: "Watch in YT Zero from here",
-  saveForLater: "Save for later in YT Zero",
+  saveForLater: "Save for later",
   saveForLaterSaved: "Saved to",
   saveForLaterAlready: "Already saved, moved to the front of",
   saveForLaterSignIn: "Sign in to YT Zero in this browser first.",
