@@ -43,6 +43,8 @@ The sibling `../ytzero` repository owns the application-side bridge. Its relevan
 - On `www.youtube.com` watch pages the top-frame content script puts a YT Zero button after the subscribe button (`src/handoff.ts`), only when a default instance is set. It pauses the source player and opens the video in the default instance at the reached position (no position for live broadcasts); Ctrl/Cmd-click opens a new tab. The explicit click ignores the no-redirect marker.
 - Every hand-over to an instance watch page (automatic redirect, popup redirect, handoff button) appends `#ytRedirected` via `withRedirectedMarker()`. The YT Zero watch page reads it to offer a way back to the source video at the current position, with `#ytNoRedirect` so it is not redirected again.
 
+- "Save for later in YT Zero" is a `contextMenus` item on source-site video links (any page) and on source-site watch pages (`src/saveForLater.ts`). It POSTs `{ video_id }` to the default instance's `/api/saved-for-later` with `credentials: "include"`, relying on the paired instance's host access; the instance keeps the videos in a "Saved for later" playlist shown as a row on Main. The result is shown as a per-tab badge and, on source-site pages, a toast from the top-frame content script (`ytze-toast`).
+
 ## Embedded player interaction decisions
 
 - Treat validated `context.video.contentType` (`default`, `short`, or `livestream`) as the source of truth for player presentation. Missing or unknown values retain the legacy `/shorts` and native-live fallbacks; valid context changes apply in place without reloading the iframe.

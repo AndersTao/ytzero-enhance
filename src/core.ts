@@ -46,6 +46,11 @@ function withInstancePath(instanceUrl: string, path: string, search = ""): strin
   return base.toString();
 }
 
+/** An API address on the instance, keeping a reverse-proxy base path. */
+export function instanceApiUrl(instanceUrl: string, path: string): string | null {
+  return withInstancePath(instanceUrl, `/api${path}`);
+}
+
 export function hasNoRedirectMarker(input: string): boolean {
   const url = youtubeUrl(input);
   return Boolean(url?.hash.slice(1).split("&").includes(YT_NO_REDIRECT_MARKER));

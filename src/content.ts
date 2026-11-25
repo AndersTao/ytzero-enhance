@@ -3,6 +3,7 @@ import { BridgeScreenshotRequest, claimScreenshotRequest, configuredPageMatches,
 import { EMBEDDED_CONFIGURATION_ID, PAIRED_INSTANCES_KEY, parseEmbeddedConfigurationText } from "./instances";
 import { t } from "./i18n";
 import { installHandoffButton, isSourceSiteTopPage } from "./handoff";
+import { showPageToast } from "./toast";
 import { advanceOwnedPlaybackRate, chapterShortcutTarget, DEFAULT_SHORTCUT_BINDINGS, isEditableShortcutEvent, matchingShortcutAction, OwnedPlaybackRate, PARENT_OWNED_SHORTCUT_ACTIONS, shortcutAllowsRepeat, shortcutChordFromEvent, shortcutEventPayload, shortcutOperationBlocked, TemporaryBoostController, type ShortcutAction, type ShortcutBindings } from "./shortcuts";
 import { addApiListener, callApi, ext, extensionContextAvailable, isFirefox, onExtensionContextInvalidated } from "./webext";
 
@@ -1168,6 +1169,10 @@ addApiListener(ext?.runtime?.onMessage, (message: any, _sender: any, sendRespons
   }
   if (message?.type === "ytze-request-context" && window.top === window && activeInstanceUrl && configuredPageMatches(location.href, activeInstanceUrl)) {
     document.dispatchEvent(new Event(ENHANCE_BRIDGE_EVENTS.ready));
+    respond({ ok: true });
+  }
+  if (message?.type === "ytze-toast" && window.top === window && typeof message.message === "string") {
+    showPageToast(message.message, message.tone === "error" ? "error" : "success");
     respond({ ok: true });
   }
   if (message?.type === "ytze-capture-visibility" && playerController) { playerController.setHidden(Boolean(message.hidden)); respond({ ok: true }); }
