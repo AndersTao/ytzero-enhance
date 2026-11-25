@@ -22,6 +22,7 @@
   "enhancePlayerDescription": { "message": "Aussehen und Verhalten wie in YT Zero" },
   "saveFrame": { "message": "Bild speichern" },
   "openYtZero": { "message": "YT Zero öffnen" },
+  "watchInYtZero": { "message": "Ab hier in YT Zero ansehen" },
   "pairAnother": { "message": "+ Aktuellen Tab als weitere Instanz verbinden" },
   "instancesAndSettings": { "message": "Instanzen und Einstellungen" },
   "browserExtension": { "message": "Browser-Erweiterung" },

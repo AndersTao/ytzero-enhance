@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { containedMediaRect, embeddedPlayerModeForPage, hasNoRedirectMarker, isPreviewEmbedUrl, isRedirectableYouTubeUrl, localContentUrl, localWatchUrl, parseTimestamp, playableLiveRange, playerTimeline, resolveEmbeddedPlayerMode, safeFilename, screenshotFilename, youtubePlaylistId, youtubeVideoId } from "../src/core";
+import { containedMediaRect, embeddedPlayerModeForPage, handoffWatchUrl, withRedirectedMarker, hasNoRedirectMarker, isPreviewEmbedUrl, isRedirectableYouTubeUrl, localContentUrl, localWatchUrl, parseTimestamp, playableLiveRange, playerTimeline, resolveEmbeddedPlayerMode, safeFilename, screenshotFilename, youtubePlaylistId, youtubeVideoId } from "../src/core";
 
 describe("YouTube URL mapping", () => {
   test.each([
@@ -79,4 +79,34 @@ test("safe screenshot names", () => {
 test("crops object-fit contain letterboxing", () => {
   expect(containedMediaRect({ x: 10, y: 20, width: 1000, height: 1000 }, 1920, 1080)).toEqual({ x: 10, y: 238.75, width: 1000, height: 562.5 });
   expect(containedMediaRect({ x: 10, y: 20, width: 1000, height: 400 }, 1000, 1000)).toEqual({ x: 310, y: 20, width: 400, height: 400 });
+});
+
+describe("handing a source-site video over to YT Zero", () => {
+  const instance = "https://home.test/apps/ytzero/";
+  test("opens the video at the position reached", () => expect(handoffWatchUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ", instance, 83.7)).toBe("https://home.test/apps/ytzero/watch/dQw4w9WgXcQ?t=83"));
+  test("replaces a time already in the address", () => expect(handoffWatchUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=10s", instance, 125)).toBe("https://home.test/apps/ytzero/watch/dQw4w9WgXcQ?t=125"));
+  test("drops the time near the start or when unknown", () => {
+    expect(handoffWatchUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=10", instance, 0.4)).toBe("https://home.test/apps/ytzero/watch/dQw4w9WgXcQ");
+    expect(handoffWatchUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ", instance, Number.NaN)).toBe("https://home.test/apps/ytzero/watch/dQw4w9WgXcQ");
+  });
+  test("keeps the playlist", () => expect(handoffWatchUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PL1234567890", instance, 5)).toBe("https://home.test/apps/ytzero/watch/dQw4w9WgXcQ/playlist/PL1234567890?t=5"));
+  test("works on a page opened with the no-redirect marker", () => expect(handoffWatchUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ#ytNoRedirect", instance, 7)).toBe("https://home.test/apps/ytzero/watch/dQw4w9WgXcQ?t=7"));
+  test("ignores pages without a video, embeds and other sites", () => {
+    expect(handoffWatchUrl("https://www.youtube.com/", instance, 5)).toBeNull();
+    expect(handoffWatchUrl("https://www.youtube.com/embed/dQw4w9WgXcQ", instance, 5)).toBeNull();
+    expect(handoffWatchUrl("https://example.com/watch?v=dQw4w9WgXcQ", instance, 5)).toBeNull();
+    expect(handoffWatchUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "", 5)).toBeNull();
+  });
+});
+
+describe("marking videos sent to YT Zero", () => {
+  test("marks watch pages, also below a base path and with a playlist", () => {
+    expect(withRedirectedMarker("https://home.test/watch/dQw4w9WgXcQ?t=5")).toBe("https://home.test/watch/dQw4w9WgXcQ?t=5#ytRedirected");
+    expect(withRedirectedMarker("https://home.test/apps/ytzero/watch/dQw4w9WgXcQ/playlist/PL1234567890")).toBe("https://home.test/apps/ytzero/watch/dQw4w9WgXcQ/playlist/PL1234567890#ytRedirected");
+  });
+  test("leaves channel, playlist and search pages alone", () => {
+    expect(withRedirectedMarker("https://home.test/channel/UC1234567890123456789012")).toBe("https://home.test/channel/UC1234567890123456789012");
+    expect(withRedirectedMarker("https://home.test/playlist/PL1234567890")).toBe("https://home.test/playlist/PL1234567890");
+    expect(withRedirectedMarker(null)).toBeNull();
+  });
 });

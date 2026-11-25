@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, localContentUrl, normalizeSettings } from "./core";
+import { DEFAULT_SETTINGS, localContentUrl, normalizeSettings, withRedirectedMarker } from "./core";
 import { hostPermissionPattern } from "./contract";
 import { friendlyInstanceName, inferInstanceUrl, PairedInstance, parseEmbeddedConfigurationText } from "./instances";
 import { localizeDocument, t } from "./i18n";
@@ -52,7 +52,7 @@ async function loadActiveRedirect() {
   const tab = tabs[0];
   if (tab?.id == null || !tab.url) return;
   const channelId = await sourceChannelId(tab.id, tab.url);
-  const destination = localContentUrl(tab.url, defaultInstance.url, channelId);
+  const destination = withRedirectedMarker(localContentUrl(tab.url, defaultInstance.url, channelId));
   if (!destination) return;
   activeRedirect = { tabId: tab.id, url: destination };
   redirectCurrent.textContent = `${t("redirectTo")} ${instanceAddress(defaultInstance.url)}`;

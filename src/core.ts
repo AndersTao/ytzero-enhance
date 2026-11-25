@@ -17,6 +17,8 @@ const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
 const CHANNEL_ID = /^UC[A-Za-z0-9_-]{22}$/;
 const PLAYLIST_ID = /^[A-Za-z0-9_-]{10,80}$/;
 export const YT_NO_REDIRECT_MARKER = "ytNoRedirect";
+/** Tells a YT Zero watch page the video was sent there from the source site. */
+export const YT_REDIRECTED_MARKER = "ytRedirected";
 
 function youtubeUrl(input: string): URL | null {
   try {
@@ -151,6 +153,34 @@ export function localWatchUrl(input: string, instanceUrl: string): string | null
   const playlistId = youtubePlaylistId(input);
   const path = playlistId ? `/watch/${id}/playlist/${encodeURIComponent(playlistId)}` : `/watch/${id}`;
   return withInstancePath(instanceUrl, path, seconds > 0 ? `?t=${seconds}` : "");
+}
+
+/**
+ * Hand the video on the current source-site page over to YT Zero at the
+ * position it has reached. The user asked for it explicitly, so the
+ * no-redirect marker does not apply; any time in the address is replaced.
+ */
+export function handoffWatchUrl(input: string, instanceUrl: string, seconds: number): string | null {
+  const source = youtubeUrl(input);
+  if (!source || /^\/embed\//.test(source.pathname)) return null;
+  const unmarked = new URL(source);
+  unmarked.hash = "";
+  unmarked.searchParams.delete("t");
+  unmarked.searchParams.delete("start");
+  const at = Number.isFinite(seconds) && seconds >= 1 ? Math.floor(seconds) : 0;
+  if (at) unmarked.searchParams.set("t", String(at));
+  return localWatchUrl(unmarked.toString(), instanceUrl);
+}
+
+/** Mark an instance watch URL so the page can offer the way back to the source site. */
+export function withRedirectedMarker(destination: string | null): string | null {
+  if (!destination) return null;
+  try {
+    const url = new URL(destination);
+    if (!/\/watch\/[^/]+/.test(url.pathname)) return destination;
+    url.hash = YT_REDIRECTED_MARKER;
+    return url.toString();
+  } catch { return destination; }
 }
 
 /** Map a source-site video, public playlist, or channel page to YT Zero. */

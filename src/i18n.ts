@@ -18,6 +18,7 @@ const EN: Record<string, string> = {
   enhancePlayerDescription: "Appearance and behavior consistent with YT Zero",
   saveFrame: "Save frame",
   openYtZero: "Open YT Zero",
+  watchInYtZero: "Watch in YT Zero from here",
   pairAnother: "+ Connect the current tab as another instance",
   instancesAndSettings: "Instances and settings",
   browserExtension: "Browser extension",
